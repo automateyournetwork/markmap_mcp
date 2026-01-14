@@ -1,0 +1,8 @@
+{
+  "schema": "gait.config.v0",
+  "remotes": {
+    "origin": {
+      "url": "https://gaithub.com"
+    }
+  }
+}
