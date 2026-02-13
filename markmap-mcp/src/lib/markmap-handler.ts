@@ -145,16 +145,23 @@ export class MarkmapHandler {
       const markmapOptions = options ? deriveOptions(options) : undefined;
 
       // Get SVG element and render
-      const svgElement = document.getElementById('markmap') as unknown as SVGSVGElement;
+      const svgElement = document.getElementById('markmap');
       if (!svgElement) {
         throw new Error('SVG element not found');
       }
 
+      // Type-safe casting for JSDOM environment:
+      // In JSDOM, getElementById returns Element (from jsdom's DOM implementation)
+      // We need to cast it to SVGSVGElement for markmap-view's API
+      // The double assertion through unknown is necessary due to type incompatibility
+      // between JSDOM's Element and the browser's SVGSVGElement
+      const svg = svgElement as unknown as SVGSVGElement;
+
       // Create markmap
-      Markmap.create(svgElement, markmapOptions, root);
+      Markmap.create(svg, markmapOptions, root);
 
       // Extract SVG content
-      const svgContent = svgElement.outerHTML;
+      const svgContent = svg.outerHTML;
 
       return svgContent;
     } finally {

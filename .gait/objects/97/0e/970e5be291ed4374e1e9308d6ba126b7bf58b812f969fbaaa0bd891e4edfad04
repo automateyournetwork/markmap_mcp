@@ -1,0 +1,1 @@
+{"branch":"markmap-mcp-main","created_at":"2026-01-15T08:44:49","kind":"auto","message":"TypeScript type fixes for MCP SDK compatibility and JSDOM SVG handling","meta":{},"parents":["5c30a7c9eadb75b58986d060c2302bbd1a32cc672b84ee69a8533939d36f9f97"],"schema":"gait.commit.v0","snapshot_id":null,"turn_ids":["a3a1c4d9d60787f1674983b4dffeefc8269dd4148b9433b56251ae4198b3289c"]}

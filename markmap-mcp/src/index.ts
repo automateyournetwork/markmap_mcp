@@ -14,7 +14,8 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
-  Tool
+  Tool,
+  CallToolResult
 } from '@modelcontextprotocol/sdk/types.js';
 
 // Import tool handlers
@@ -240,11 +241,19 @@ async function main() {
           };
       }
 
-      // Return MCP-compliant response
-      return {
+      // Return MCP-compliant response with explicit type
+      // The structuredContent must be cast to Record<string, unknown> to match MCP SDK types
+      // We use double assertion through unknown for type compatibility
+      const response: CallToolResult = {
         content: result.content,
-        isError: 'isError' in result ? result.isError : undefined
+        ...(('structuredContent' in result && result.structuredContent) && {
+          structuredContent: result.structuredContent as unknown as Record<string, unknown>
+        }),
+        ...(('isError' in result && result.isError !== undefined) && {
+          isError: result.isError
+        })
       };
+      return response;
     } catch (error) {
       console.error(`Error in tool ${name}:`, error);
       return {
