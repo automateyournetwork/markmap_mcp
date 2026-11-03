@@ -84,7 +84,10 @@ In Claude Code, try:
 
 ### 1. `markmap_generate`
 
-Convert Markdown text to interactive mindmap SVG.
+Convert Markdown text to a mindmap SVG.
+
+The SVG is rendered statically under Node (no browser): a laid-out, self-contained
+image. `duration`, `zoom` and `pan` are accepted for compatibility and have no effect.
 
 **Input:**
 ```typescript
@@ -451,7 +454,7 @@ This project is licensed under the MIT License - see the [LICENSE](../LICENSE) f
 
 - ✅ All 5 core tools implemented
 - ✅ MCP server functional
-- ✅ JSDOM integration for Node.js
+- ✅ Static SVG rendering under Node.js (no browser or DOM required)
 - ✅ TypeScript type safety
 - ✅ Comprehensive error handling
 - ✅ Security validations
@@ -471,4 +474,4 @@ For questions, issues, or feature requests:
 
 Made with ❤️ by AutomateYourNetwork
 
-**Built with**: TypeScript, Node.js, Markmap, MCP SDK, JSDOM
+**Built with**: TypeScript, Node.js, Markmap, MCP SDK

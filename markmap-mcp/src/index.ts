@@ -31,7 +31,7 @@ import { customizeTool } from './tools/customize.js';
 const TOOLS: Tool[] = [
   {
     name: 'markmap_generate',
-    description: 'Generate an interactive mindmap SVG from Markdown content. Supports custom options for visualization.',
+    description: 'Generate a mindmap SVG from Markdown content. Supports custom options for visualization.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -45,11 +45,11 @@ const TOOLS: Tool[] = [
           properties: {
             colorFreezeLevel: {
               type: 'number',
-              description: 'Freeze colors at this level (default: 6)'
+              description: 'Nodes deeper than this level keep their parent\'s color (default: 0, never freeze)'
             },
             duration: {
               type: 'number',
-              description: 'Animation duration in ms (default: 500)'
+              description: 'Accepted for compatibility; static SVG output is not animated'
             },
             maxWidth: {
               type: 'number',
@@ -57,11 +57,11 @@ const TOOLS: Tool[] = [
             },
             zoom: {
               type: 'boolean',
-              description: 'Enable zoom interaction (default: true)'
+              description: 'Accepted for compatibility; static SVG output has no zoom'
             },
             pan: {
               type: 'boolean',
-              description: 'Enable pan interaction (default: true)'
+              description: 'Accepted for compatibility; static SVG output has no pan'
             }
           }
         }

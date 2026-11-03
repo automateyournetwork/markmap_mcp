@@ -8,8 +8,7 @@
  */
 
 import { Transformer } from 'markmap-lib';
-import { Markmap, loadCSS, loadJS, deriveOptions } from 'markmap-view';
-import { JSDOM } from 'jsdom';
+import { renderStaticSvg } from './svg-renderer.js';
 import type { MarkmapOptions, MarkmapNode, MarkmapTheme } from './types.js';
 
 /**
@@ -60,7 +59,7 @@ const COLOR_SCHEMES: Record<MarkmapTheme, string[]> = {
  * Main class for handling markmap operations
  *
  * Wraps markmap-lib and markmap-view to provide a clean interface
- * for the MCP tools. Uses JSDOM for Node.js SVG generation.
+ * for the MCP tools. SVG is rendered statically (see svg-renderer).
  */
 export class MarkmapHandler {
   private transformer: Transformer;
@@ -92,85 +91,26 @@ export class MarkmapHandler {
   }
 
   /**
-   * Render Markdown to SVG string using JSDOM
+   * Render Markdown to a static SVG string
    *
    * @param content - Markdown text to render
    * @param options - Rendering options
+   * @param colors - Branch colors (defaults to markmap's palette)
+   * @param dark - Light text on a dark background
    * @returns SVG content as string
    */
-  async renderToSVG(content: string, options?: MarkmapOptions): Promise<string> {
-    // Parse markdown first
-    const { root, features } = this.parseMarkdown(content);
-
-    // Create JSDOM environment
-    const dom = new JSDOM(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <meta charset="utf-8">
-          <style>
-            svg {
-              width: 100%;
-              height: 100%;
-            }
-          </style>
-        </head>
-        <body>
-          <svg id="markmap" width="800" height="600"></svg>
-        </body>
-      </html>
-    `);
-
-    const { window } = dom;
-    const { document } = window;
-
-    // Set up global objects for markmap-view
-    (global as any).window = window;
-    (global as any).document = document;
-    (global as any).SVGElement = window.SVGElement;
-    (global as any).Element = window.Element;
-
-    try {
-      // Get assets and load them
-      const assets = this.transformer.getUsedAssets(features);
-
-      // Load CSS if available
-      if (assets.styles) {
-        const style = document.createElement('style');
-        style.textContent = assets.styles.join('\n');
-        document.head.appendChild(style);
-      }
-
-      // Derive options for rendering
-      const markmapOptions = options ? deriveOptions(options) : undefined;
-
-      // Get SVG element and render
-      const svgElement = document.getElementById('markmap');
-      if (!svgElement) {
-        throw new Error('SVG element not found');
-      }
-
-      // Type-safe casting for JSDOM environment:
-      // In JSDOM, getElementById returns Element (from jsdom's DOM implementation)
-      // We need to cast it to SVGSVGElement for markmap-view's API
-      // The double assertion through unknown is necessary due to type incompatibility
-      // between JSDOM's Element and the browser's SVGSVGElement
-      const svg = svgElement as unknown as SVGSVGElement;
-
-      // Create markmap
-      Markmap.create(svg, markmapOptions, root);
-
-      // Extract SVG content
-      const svgContent = svg.outerHTML;
-
-      return svgContent;
-    } finally {
-      // Clean up global objects
-      delete (global as any).window;
-      delete (global as any).document;
-      delete (global as any).SVGElement;
-      delete (global as any).Element;
-    }
+  async renderToSVG(content: string, options?: MarkmapOptions, colors?: string[], dark = false): Promise<string> {
+    const { root } = this.parseMarkdown(content);
+    return renderStaticSvg(root, {
+      fontSize: options?.fontSize,
+      maxWidth: options?.maxWidth,
+      spacing: options?.spacing,
+      paddingX: options?.paddingX,
+      paddingY: options?.paddingY,
+      colorFreezeLevel: options?.colorFreezeLevel,
+      colors,
+      dark
+    });
   }
 
   /**
@@ -237,11 +177,10 @@ export class MarkmapHandler {
       mergedOptions = { ...mergedOptions, ...options };
     }
 
-    // Note: Color schemes would need to be applied through CSS customization
-    // This is a simplified implementation - full color customization would require
-    // modifying the SVG output or injecting custom CSS
-
-    return this.renderToSVG(content, mergedOptions);
+    const colors = colorScheme && colorScheme.length > 0
+      ? colorScheme
+      : theme ? this.getColorScheme(theme) : undefined;
+    return this.renderToSVG(content, mergedOptions, colors, theme === 'dark');
   }
 
   /**
